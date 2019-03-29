@@ -23,5 +23,7 @@ FILE_DELIMITER = chr(28)
 CLIENT_DELIMITER = chr(30)
 SERVER_DELIMITER = chr(31) * 3
 
+DB_NAME = "AMD.db"
+
 EMAIL_USERNAME = "ben.gabay38@gmail.com"
 EMAIL_PASSWORD = "manchester2110#%"

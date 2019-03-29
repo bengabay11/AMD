@@ -1,10 +1,10 @@
 import wx
-from server import config
-from server.UI.UserInfoFrame import UserInfoFrame
+from src.server import config
+from src.server.UI.UserInfoFrame import UserInfoFrame
 
 
 def set_icon(frame):
-    if config.WX_VERSION in wx.version():
+    if config.WX_VERSION not in wx.version():
         new_icon = wx.EmptyIcon()
     else:
         new_icon = wx.Icon()

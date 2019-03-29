@@ -6,10 +6,10 @@ import hashlib
 import time
 import requests
 from bs4 import BeautifulSoup
-from server import config
-from server.encryptions.AESCipher import AESCipher
-from server.db.database import DataBase
-from server.EmailSender import EmailSender
+from src.server import config
+from src.server.db.database import DataBase
+from src.server.encryptions.AESCipher import AESCipher
+from src.server.EmailSender import EmailSender
 
 FINISH = False
 FORGOT_PASSWORD = False
@@ -194,7 +194,7 @@ class ClientHandler(Thread):
     def write_to_file(self, data):
         """The function gets data and writes it to file. the UI read the data from this file and present it."""
         self.lock.acquire()
-        file_object = codecs.open("UI data.txt", "a", encoding="utf-8")
+        file_object = codecs.open(config.UI_DATA_FILENAME, "a", encoding="utf-8")
         file_object.write(data + config.FILE_DELIMITER)
         file_object.close()
         self.lock.release()

@@ -1,5 +1,5 @@
 import wx
-from server import config
+from src.server import config
 
 
 class MenuPanel(wx.Panel):

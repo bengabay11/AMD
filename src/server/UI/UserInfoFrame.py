@@ -1,6 +1,5 @@
-from wx import wx
-
-from server.UI.utils import set_icon
+from wx.core import wx
+from src.server.UI.utils import set_icon
 
 MALICIOUS_PROCESSES_DICT = {}
 

@@ -1,11 +1,10 @@
 import sqlite3
-
-from server import config
+from src.server import config
 
 
 class DataBase:
     def __init__(self):
-        self.conn = sqlite3.connect(config.DB_NAME)
+        self.conn = sqlite3.connect(config.DB_FILE_PATH)
 
     def create_table(self):
         self.conn.execute('CREATE TABLE Users(USERNAME CHAR, STATUS CHAR, SUSPICIOUS_APPS INT,'

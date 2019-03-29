@@ -1,8 +1,10 @@
 from threading import Thread
-from wx import wx
-from server import config
-from server.UI.utils import show_user_info
-from server.db.database import DataBase
+import wx
+import wx.grid
+import wx.lib.newevent
+from src.server import config
+from src.server.UI.utils import show_user_info
+from src.server.db.database import DataBase
 
 ComputationDoneEvent, EVT_COMPUTATION_DONE = wx.lib.newevent.NewEvent()
 LIST_NOTIFICATIONS = []
@@ -52,7 +54,7 @@ class TablePanel(wx.Panel):
         """The function runs as a thread, and read in while loop from txt file, to get data changes in the UI.
          every time the function gets new data she inform the UI main thread by PostEvent."""
         global NOTIFICATION, CONTINUE
-        file_name = "UI data.txt"
+        file_name = config.UI_DATA_FILENAME
         f = open(file_name, "wb")
         f.close()
         position = -1

@@ -1,6 +1,6 @@
 import wx
-from server import config
-from server.UI.utils import set_icon
+from src.server import config
+from src.server.UI.utils import set_icon
 
 
 class PreviewFrame(wx.Frame):

@@ -1,7 +1,9 @@
 from threading import Thread
 import wx
-from server.UI.TablePanel import TablePanel
-from server.UI.utils import set_icon, show_user_info
+
+from src.server.UI.MenuPanel import MenuPanel
+from src.server.UI.TablePanel import TablePanel
+from src.server.UI.utils import set_icon, show_user_info
 
 
 class MainFrame(wx.Frame):
@@ -12,7 +14,7 @@ class MainFrame(wx.Frame):
         self.Center()
         self.Bind(wx.EVT_CLOSE, self.on_close_window)
         splitter = wx.SplitterWindow(self)
-        self.menu_panel = splitter
+        self.menu_panel = MenuPanel(splitter)
         self.table_panel = TablePanel(splitter)
         splitter.SplitVertically(self.menu_panel, self.table_panel)
         splitter.SetSashGravity(0.34)
@@ -62,7 +64,7 @@ class MainFrame(wx.Frame):
         dlg = wx.MessageDialog(self, "Are you sure you want to exit AMD Server?", "Confirm Exit",
                                wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
-            file_object = open("UI data.txt", "w")
+            file_object = open(config.UI_DATA_FILENAME, "w")
             file_object.write("")
             file_object.close()
             FINISH = True

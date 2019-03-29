@@ -5,7 +5,7 @@ DATA_LENGTH = 1024
 
 ICON_PIC_NAME = "images\\amd_icon.jpg"
 WX_VERSION = "3.0"
-
+UI_DATA_FILENAME = "ui-data.txt"
 
 NORMAL_USER_PROCESS = "u0_a"
 BLACK_LIST_PROCESSES_NAMES = []
@@ -25,7 +25,7 @@ FILE_DELIMITER = chr(28)
 CLIENT_DELIMITER = chr(30)
 SERVER_DELIMITER = chr(31) * 3
 
-DB_NAME = "AMD.db"
+DB_FILE_PATH = "db\\AMD.db"
 
 EMAIL_USERNAME = "ben.gabay38@gmail.com"
 EMAIL_PASSWORD = "manchester2110#%"

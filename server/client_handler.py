@@ -4,9 +4,8 @@ from string import digits, ascii_lowercase
 from threading import Thread, Lock
 import hashlib
 import time
+import requests
 from bs4 import BeautifulSoup
-from pipenv.utils import requests
-
 from server import config
 from server.AMD_Encryption import AESCipher
 from server.database import DataBase

@@ -1,10 +1,9 @@
 import pickle
-from Crypto.PublicKey import RSA
-from Crypto.Util import randpool
+from Cryptodome.PublicKey import RSA
 import base64
 import hashlib
-from Crypto import Random
-from Crypto.Cipher import AES
+from Cryptodome import Random
+from Cryptodome.Cipher import AES
 
 
 class AESCipher(object):
@@ -39,8 +38,7 @@ class RSACipher:
     """Asymmetric  Encryption class uses AES cipher."""
     def __init__(self):
         """The function create random and private key to the RSACipher object."""
-        random = randpool.RandomPool()
-        self.private_key = RSA.generate(1024, random.get_bytes)
+        self.private_key = RSA.generate(1024)
         self.public_key = ""
 
     def get_public_key(self):

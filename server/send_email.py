@@ -1,10 +1,9 @@
+import imghdr
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
-from email.MIMEBase import MIMEBase
 from email.errors import MessageError
-from email import encoders
 import os
+from email.message import EmailMessage
+
 
 SMTP_SERVER_HOST = 'smtp.gmail.com'
 SMTP_SERVER_PORT = 587
@@ -29,11 +28,11 @@ class Email:
         self.file_name = file_name
         self.to = to
 
-        self.msg = MIMEMultipart()
+        self.msg = EmailMessage()
         self.msg['From'] = self.from_adrr
         self.msg['To'] = self.to
 
-        self.msg.attach(MIMEText(self.body, 'plain'))
+        self.msg.set_content(self.body, 'plain')
         try:
             self.add_file_to_message()
         finally:
@@ -56,10 +55,6 @@ class Email:
     def add_file_to_message(self):
         # The function attach file to the message
         if os.path.exists(self.file_name):
-
             attachment_file = open(self.file_name, "rb")
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload(attachment_file.read())
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', "attachment; filename= %s" % self.file_name)
-            self.msg.attach(part)
+            image_data = attachment_file.read()
+            self.msg.add_attachment(image_data, maintype='image', subtype=imghdr.what(None, image_data))

@@ -1,20 +1,18 @@
-from wx.core import wx
-from src.server.UI.utils import set_icon
+# from src.server.UI.utils import set_icon
+import wx
+import wx.grid
 
 MALICIOUS_PROCESSES_DICT = {}
 
 
 class UserInfoFrame(wx.Frame):
-    """Frame the present the details of the relevant user."""
-
     def __init__(self, username, status, suspicious_apps, check_processes, camera_on, unknown_sources, email):
         wx.Frame.__init__(self, None, -1, username + "'s Details", size=(600, 300))
 
-        self.Bind(wx.EVT_CLOSE, self.on_close_window)
         self.username = username
         self.details_grid = ""
         self.processes_grid = ""
-        set_icon(self)
+        # set_icon(self)
         self.create_details_grid(status, suspicious_apps, check_processes, camera_on, unknown_sources, email)
         self.create_processes_grid()
         self.details_grid.AutoSizeColumns(True)
@@ -31,7 +29,6 @@ class UserInfoFrame(wx.Frame):
         self.SetSizer(sizer)
 
     def create_title(self, text):
-        """The function creates StaticText According to the appropriate parameters and return the object."""
         title = wx.StaticText(self, label=text, pos=(250, 20))
         font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.BOLD)
         title.SetFont(font)
@@ -39,7 +36,6 @@ class UserInfoFrame(wx.Frame):
         return title
 
     def create_details_grid(self, status, suspicious_apps, check_processes, camera_on, unknown_sources, email):
-        """The function return the grid that present the details of the user."""
         self.details_grid = wx.grid.Grid(self)
         self.details_grid.CreateGrid(2, 7)
         for row in range(2):
@@ -62,7 +58,6 @@ class UserInfoFrame(wx.Frame):
         self.details_grid.SetCellValue(0, 6, email)
 
     def create_processes_grid(self):
-        """The function return the grid that present the malicious processes of the user."""
         final_list_processes = []
         try:
             list_processes = MALICIOUS_PROCESSES_DICT[self.username]
@@ -95,6 +90,3 @@ class UserInfoFrame(wx.Frame):
             self.processes_grid.SetCellValue(row, 3, process_info[3])
             self.processes_grid.SetCellValue(row, 4, process_info[4])
             row += 1
-
-    def on_close_window(self, event):
-        self.Destroy()

@@ -17,4 +17,3 @@ def show_user_info(username, status, suspicious_apps, check_processes, camera_on
     user_frame = UserInfoFrame(username, status, suspicious_apps, check_processes, camera_on, unknown_sources, email)
     user_frame.Show()
     app.MainLoop()
-    print("finish1")

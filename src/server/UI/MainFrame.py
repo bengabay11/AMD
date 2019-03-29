@@ -1,6 +1,5 @@
-from threading import Thread
 import wx
-
+from src.server import config
 from src.server.UI.MenuPanel import MenuPanel
 from src.server.UI.TablePanel import TablePanel
 from src.server.UI.utils import set_icon, show_user_info
@@ -45,11 +44,7 @@ class MainFrame(wx.Frame):
                 camera_on = self.table_panel.grid.GetCellValue(i, 4)
                 unknown_sources = self.table_panel.grid.GetCellValue(i, 5)
                 email = self.table_panel.grid.GetCellValue(i, 6)
-                show_user_info_thread = Thread(target=show_user_info,
-                                               args=(username, status, suspicious_apps, check_processes,
-                                                     camera_on, unknown_sources, email))
-                show_user_info_thread.daemon = True
-                show_user_info_thread.start()
+                show_user_info(username, status, suspicious_apps, check_processes, camera_on, unknown_sources, email)
                 break
         if find is False:
             dlg = wx.MessageDialog(self, "The username: '" + username + "' does'nt exist in the Database. "

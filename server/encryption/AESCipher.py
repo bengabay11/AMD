@@ -5,20 +5,17 @@ from Cryptodome.Cipher import AES
 
 
 class AESCipher(object):
-    """Symmetric Encryption class uses AES cipher."""
     def __init__(self, key):
         self.bs = 16
         self.key = hashlib.sha256(key.encode()).digest()
 
     def encrypt(self, message):
-        """The function encrypt the data with te AES key."""
         message = self._pad(message)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
         return base64.b64encode(iv + cipher.encrypt(message))
 
     def decrypt(self, enc):
-        """The function decrypt the data with te AES key."""
         enc = base64.b64decode(enc)
         iv = enc[:AES.block_size]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)

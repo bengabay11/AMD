@@ -100,7 +100,8 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
+# my
 .mypy_cache/
 .idea/
 Pipfile
+ui-data.txt

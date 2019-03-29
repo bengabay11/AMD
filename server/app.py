@@ -2,7 +2,7 @@ from threading import Thread
 import wx
 from server import config, client_handler
 from server.Server import Server
-from server.UI.UI import MyFrame
+from server.UI.MainFrame import MainFrame
 
 
 def start_server():
@@ -20,7 +20,7 @@ def main():
     server_thread.start()
 
     app = wx.App(False)
-    main_frame = MyFrame()
+    main_frame = MainFrame()
     main_frame.Show()
     app.MainLoop()
 

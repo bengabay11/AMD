@@ -1,5 +1,4 @@
 import socket
-from server import config, client_handler
 
 
 class Server:
@@ -15,16 +14,3 @@ class Server:
 
     def accept(self):
         return self.__socket.accept()
-
-
-def start():
-    server_socket = Server()
-    server_socket.start(config.SERVER_IP, config.SERVER_PORT, config.NUM_CLIENTS)
-    while True:
-        (client_socket, client_address) = server_socket.accept()
-        clh = client_handler.ClientHandler(client_socket, client_address)
-        clh.start()
-
-
-if __name__ == '__main__':
-    start()

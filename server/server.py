@@ -1,6 +1,5 @@
 import socket
-import client_handler
-import config
+from server import config, client_handler
 
 
 class Server:
@@ -12,7 +11,7 @@ class Server:
         """The function starts the listening of the server."""
         self.__socket.bind((ip, port))
         self.__socket.listen(num_clients)
-        print "Listening on port %d" % port + '...'
+        print("Listening on port %d" % port + '...')
 
     def accept(self):
         return self.__socket.accept()

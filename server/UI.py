@@ -1,10 +1,9 @@
 import wx
 import wx.grid
 import wx.lib.newevent
-import config
-from database import DataBase
 from threading import Thread
-import server
+from server import config
+from server.database import DataBase
 
 MALICIOUS_PROCESSES_DICT = {}
 ComputationDoneEvent, EVT_COMPUTATION_DONE = wx.lib.newevent.NewEvent()
@@ -156,7 +155,7 @@ class TablePanel(wx.Panel):
         camera_on = str(camera_on)
         check_processes = str(check_processes)
         row = self.db.num_rows()
-        for i in xrange(100):
+        for i in range(100):
             check_username = self.grid.GetCellValue(i, 0)
             if check_username == '':
                 row = i
@@ -177,7 +176,7 @@ class TablePanel(wx.Panel):
 
     def delete_user(self, username):
         """The function gets username and deletes him from the table."""
-        for i in xrange(100):
+        for i in range(100):
             check_username = self.grid.GetCellValue(i, 0)
             if check_username == username:
                 self.grid.SetCellValue(i, 0, "")
@@ -379,7 +378,7 @@ def show_user_info(username, status, suspicious_apps, check_processes, camera_on
     user_frame = UserInfoFrame(username, status, suspicious_apps, check_processes, camera_on, unknown_sources, email)
     user_frame.Show()
     app.MainLoop()
-    print "finish1"
+    print("finish1")
 
 
 class MyFrame(wx.Frame):
@@ -412,7 +411,7 @@ class MyFrame(wx.Frame):
             username = self.menu_panel.find_user_input.GetValue()
         self.menu_panel.find_user_input.SetValue('')
         find = False
-        for i in xrange(100):
+        for i in range(100):
             check_username = self.table_panel.grid.GetCellValue(i, 0)
             if check_username == username:
                 find = True
@@ -488,7 +487,7 @@ def main():
     preview_app.MainLoop()
 
     if START:
-        server_thread = Thread(target=server.start)
+        server_thread = Thread(target=AMD.start)
         server_thread.daemon = True
         server_thread.start()
 

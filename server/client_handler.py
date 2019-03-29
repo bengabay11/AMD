@@ -6,10 +6,11 @@ import hashlib
 import time
 from bs4 import BeautifulSoup
 from pipenv.utils import requests
-from database import DataBase
-import config
-from send_email import Email
-from AMD_Encryption import AESCipher
+
+from server import config
+from server.AMD_Encryption import AESCipher
+from server.database import DataBase
+from server.send_email import Email
 
 FINISH = False
 FORGOT_PASSWORD = False
@@ -20,7 +21,7 @@ def valid_email(email):
     if len(email.split("@")) == 2:
         if email.split("@")[0] != "" and email.split("@")[1] != "" and "." in email.split("@")[1]:
             if len(email.split("@")[1].split(".")) == 2 and email.split("@")[1].split(".")[1] != "":
-                print email.split("@")[1].split(".")
+                print(email.split("@")[1].split("."))
                 return True
     return False
 
@@ -65,7 +66,7 @@ class ClientHandler(Thread):
         self.lock = Lock()
         self.aes_key = get_random_string(10)
         self.aes_cipher = None
-        print "[%s] New client accepted: %s" % (self.name, self.__address)
+        print("[%s] New client accepted: %s" % (self.name, self.__address))
 
         self.check_apps_data = ""
         self.list_applications = []
@@ -94,7 +95,7 @@ class ClientHandler(Thread):
             for message in messages:
                 if message != "":
                     message = self.aes_cipher.decrypt(message)
-                    print "\nRequest: " + message
+                    print("\nRequest: " + message)
                     # analyze the request that the client sent
                     list_data = message.split(',')
                     request = list_data[0]
@@ -122,13 +123,13 @@ class ClientHandler(Thread):
                         check_version_thread.start()
 
                     elif request == "CheckAppsData":
-                        print "Sending CheckApps part accepted"
+                        print("Sending CheckApps part accepted")
                         self.__socket.send(self.aes_cipher.encrypt("CheckApps part accepted") +
                                            config.CLIENT_DELIMITER)
                         self.check_apps_data += list_data[1]
 
                     elif request == 'CheckApps':
-                        print "CheckApps Length: " + str(len(self.check_apps_data))
+                        print("CheckApps Length: " + str(len(self.check_apps_data)))
                         self.handle_check_apps_data()
                         check_apps_thread = Thread(target=self.check_apps)
                         check_apps_thread.start()
@@ -151,7 +152,7 @@ class ClientHandler(Thread):
                         self.check_processes_data += list_data[1]
 
                     elif request == "CheckProcesses":
-                        print "CheckProcesses Length: " + str(len(self.check_processes_data))
+                        print("CheckProcesses Length: " + str(len(self.check_processes_data)))
                         output = self.check_processes_data
                         self.check_processes_data = ""
                         check_processes_thread = Thread(target=self.check_processes, args=(output,))
@@ -204,7 +205,7 @@ class ClientHandler(Thread):
          that says if he was able to connect or not."""
         user = self.db.get_user(check_username)
         if user is None:
-            print "Sending Incorrect Username"
+            print("Sending Incorrect Username")
             self.__socket.send(self.aes_cipher.encrypt("Incorrect Username") + config.CLIENT_DELIMITER)
         else:
             username, password, forgot_password = user[0], user[6], user[7]
@@ -214,14 +215,14 @@ class ClientHandler(Thread):
                 self.db.update_user(username, "STATUS", "Online")
                 self.write_to_file("Login" + "," + username)
                 if forgot_password == 0:
-                    print "Sending to " + self.username + ": Login Complete"
+                    print("Sending to " + self.username + ": Login Complete")
                     self.__socket.send(self.aes_cipher.encrypt("Login Complete") + config.CLIENT_DELIMITER)
                 elif forgot_password == 1:
-                    print "Sending to " + self.username + ": Login Complete, need to change password"
+                    print("Sending to " + self.username + ": Login Complete, need to change password")
                     self.__socket.send(self.aes_cipher.encrypt("Login Complete, need to change password") +
                                        config.CLIENT_DELIMITER)
             else:
-                print "sending: Incorrect Password"
+                print("sending: Incorrect Password")
                 self.__socket.send(self.aes_cipher.encrypt("Incorrect Password") + config.CLIENT_DELIMITER)
 
     def sign_up(self, username, password, email):
@@ -233,25 +234,25 @@ class ClientHandler(Thread):
                 self.username = username
                 password = hashlib.sha224(password).hexdigest()
                 self.db.add_user([username, "Online", 0, 0, 0, email, password, False, 0])
-                print "sending Username Accepted"
+                print("sending Username Accepted")
                 self.__socket.send(self.aes_cipher.encrypt("Username Accepted") + config.CLIENT_DELIMITER)
                 self.write_to_file("SignUp" + "," + username + "," + email)
             else:
-                print "sending Username Exist"
+                print("sending Username Exist")
                 self.__socket.send(self.aes_cipher.encrypt("Username Exist") + config.CLIENT_DELIMITER)
         else:
-            print "Sending Invalid Email"
+            print("Sending Invalid Email")
             self.__socket.send(self.aes_cipher.encrypt("Invalid Email") + config.CLIENT_DELIMITER)
 
     def handle_check_apps_data(self):
         """ The function create from the full data of CheckApps list of applications."""
-        print "Sending Loading Complete"
+        print("Sending Loading Complete")
         self.__socket.send(self.aes_cipher.encrypt("Loading Complete") + config.CLIENT_DELIMITER)
         time.sleep(1)
         check_apps_data = self.check_apps_data
         self.check_apps_data = ""
         list_apps = check_apps_data.split("&")
-        for i in xrange(len(list_apps)):
+        for i in range(len(list_apps)):
             app_info = list_apps[i]
             app_name = app_info.split(":")[0]
             app_package = app_info.split(":")[1]
@@ -270,26 +271,26 @@ class ClientHandler(Thread):
                 # Check app review on play store
                 app_details = get_app_details(app_url + app_package)
                 if app_details is not None:
-                    print "Review for " + app_name + ": downloads: " + str(app_details['downloads']) + ", rating: " + \
-                          str(app_details['rating'])
+                    print("Review for " + app_name + ": downloads: " + str(app_details['downloads']) + ", rating: " + \
+                          str(app_details['rating']))
                     if app_details['rating'] < 3 or app_details['downloads'] < 100:
                         self.write_to_file("Notification, - " + self.username + ": Bad review on play store for " +
                                            app_name + " - maybe malware.\n")
-                        print "Sending Notification,Bad review on play store for " + app_name + " - maybe malware."
+                        print("Sending Notification,Bad review on play store for " + app_name + " - maybe malware.")
                         self.__socket.send(self.aes_cipher.encrypt("Notification,Bad review on play store for " +
                                                                    app_name + " - maybe malware.") +
                                            config.CLIENT_DELIMITER)
 
     def check_apps(self):
         """The function runs on the apps list and check if there is a suspicious apps."""
-        print "\n\n\n" + str(self.list_applications) + "\n\n\n"
+        print("\n\n\n" + str(self.list_applications) + "\n\n\n")
         for app_name, app_package, app_installer, list_permissions in self.list_applications:
             # app installer check
             if app_installer != config.GOOGLE_PLAY_APP and app_installer != config.SYSTEM_APP:
                 if app_installer == config.SAMSUNG_APP_STORE_APP:
                     self.write_to_file("Notification, - " + self.username + ": " + app_name + " installed from"
                                                                                               " Samsung App Store.\n")
-                    print "Sending Notification," + app_name + " installed from Samsung App Store."
+                    print("Sending Notification," + app_name + " installed from Samsung App Store.")
                     self.__socket.send(
                         self.aes_cipher.encrypt("Notification," + app_name + " installed from Samsung App Store.") +
                         config.CLIENT_DELIMITER)
@@ -297,7 +298,7 @@ class ClientHandler(Thread):
                 elif app_installer == config.AMAZON_APP:
                     self.write_to_file("Notification, - " + self.username + ": " + app_name + " installed from"
                                                                                               " Amazon.\n")
-                    print "Sending Notification," + app_name + " installed from Amazon."
+                    print("Sending Notification," + app_name + " installed from Amazon.")
                     self.__socket.send(self.aes_cipher.encrypt("Notification," + app_name +
                                                                " installed from Amazon.") +
                                        config.CLIENT_DELIMITER)
@@ -305,7 +306,7 @@ class ClientHandler(Thread):
                 elif app_installer.startswith(config.FACEBOOK_APP):
                     self.write_to_file("Notification, - " + self.username + ": " + app_name + " installed from"
                                                                                               " Facebook.\n")
-                    print "Sending Notification," + app_name + " installed from Facebook."
+                    print("Sending Notification," + app_name + " installed from Facebook.")
                     self.__socket.send(self.aes_cipher.encrypt("Notification," + app_name +
                                                                " installed from Facebook.") +
                                        config.CLIENT_DELIMITER)
@@ -313,7 +314,7 @@ class ClientHandler(Thread):
                 else:
                     self.write_to_file("Notification, - " + self.username + ": Unknown installer for " + app_name +
                                        " - " + app_installer + ".\n")
-                    print "Sending Notification,Unknown installer for " + app_name + " - " + app_installer
+                    print("Sending Notification,Unknown installer for " + app_name + " - " + app_installer)
                     self.__socket.send(self.aes_cipher.encrypt("Notification,Unknown installer for " + app_name +
                                                                " - " + app_installer) + config.CLIENT_DELIMITER)
                     suspicious_app = True
@@ -324,8 +325,8 @@ class ClientHandler(Thread):
                             suspicious_app = True
                             self.write_to_file("Notification, - " + self.username + ": Suspicious permission in " +
                                                app_name + " - " + suspicious_permission + ".\n")
-                            print "Sending Notification,Suspicious permission in " + app_name + \
-                                  " - " + suspicious_permission + "."
+                            print("Sending Notification,Suspicious permission in " + app_name + \
+                                  " - " + suspicious_permission + ".")
                             self.__socket.send(self.aes_cipher.encrypt("Notification,Suspicious permission in " +
                                                                        app_name + " - " + suspicious_permission + ".") +
                                                config.CLIENT_DELIMITER)
@@ -340,13 +341,13 @@ class ClientHandler(Thread):
     def check_smishing(check_smishing_data):
         list_inbox = []
         list_sms = check_smishing_data.split("&*(")
-        for i in xrange(len(list_sms)):
+        for i in range(len(list_sms)):
             sms_info = list_sms[i]
             address = sms_info.split("#^%")[0]
             body = sms_info.split("&*(")[1]
             list_inbox.append((address, body))
 
-        print list_inbox
+        print(list_inbox)
 
     def check_processes(self, output):
         """The function checks all the processes that the client sent, and detect malwares."""
@@ -371,7 +372,7 @@ class ClientHandler(Thread):
 
             if process_name in config.BLACK_LIST_PROCESSES_NAMES:
                 self.write_to_file("Notification, - " + self.username + ": Suspicious process: " + process_name + ".\n")
-                print "Sending Notification,Suspicious process: " + process_name + "."
+                print("Sending Notification,Suspicious process: " + process_name + ".")
                 self.__socket.send(self.aes_cipher.encrypt("Notification,Suspicious process: " + process_name) +
                                    config.CLIENT_DELIMITER)
                 suspicious_process = True
@@ -382,8 +383,8 @@ class ClientHandler(Thread):
                     "Notification, - " + self.username + ": The process: " + process_name + " was started by"
                                                                                             " suspicious user: " +
                     process_user + ".\n")
-                print "Sending Notification,The process: " + process_name + " was started by suspicious user: " + \
-                      process_user + "."
+                print("Sending Notification,The process: " + process_name + " was started by suspicious user: " + \
+                      process_user + ".")
                 self.__socket.send(
                     self.aes_cipher.encrypt("Notification,The process: " + process_name + " was started by"
                                                                                           " suspicious user: " +
@@ -416,7 +417,7 @@ class ClientHandler(Thread):
         is, the server send the password of the user to his email and if not, he send an error message to the client."""
         user = self.db.get_user(username_or_email)
         if user is None:
-            print "sending Username Does'nt Exist"
+            print("sending Username Does'nt Exist")
             self.__socket.send(self.aes_cipher.encrypt("Username Does'nt Exist") + config.CLIENT_DELIMITER)
         else:
             temporary_password = get_random_string(6)
@@ -429,20 +430,20 @@ class ClientHandler(Thread):
                    "your temporary password is: " + temporary_password
             result = self.email.send_new_email(to=email_to, subject=subject, body=body)
             if result == "Success":
-                print "Sending Email Sent"
+                print("Sending Email Sent")
                 self.__socket.send(self.aes_cipher.encrypt("Email Sent") + config.CLIENT_DELIMITER)
 
                 self.db.update_user(username, 'PASSWORD', hashlib.sha224(temporary_password).hexdigest())
                 self.db.update_user(username, 'FORGOT_PASSWORD', True)
             elif result == "Fail":
-                print "Fail Sending Email"
+                print("Fail Sending Email")
                 self.__socket.send(self.aes_cipher.encrypt("Fail Sending Email") + config.CLIENT_DELIMITER)
 
     def change_temporary_password(self, new_password):
         """The function change the password of the client to a new one."""
         self.db.update_user(self.username, 'PASSWORD', hashlib.sha224(new_password).hexdigest())
         self.db.update_user(self.username, 'FORGOT_PASSWORD', False)
-        print "sending Password Accepted"
+        print("sending Password Accepted")
         self.__socket.send(self.aes_cipher.encrypt('Password Accepted') + config.CLIENT_DELIMITER)
 
     def change_username(self, new_username):
@@ -453,23 +454,23 @@ class ClientHandler(Thread):
             self.db.update_user(self.username, 'USERNAME', new_username)
             self.write_to_file("ChangeUsername" + "," + self.username + "," + new_username)
             self.username = new_username
-            print "sending Username Changed"
+            print("sending Username Changed")
             self.__socket.send(self.aes_cipher.encrypt('Username Changed') + config.CLIENT_DELIMITER)
         else:
-            print "sending Username Exist"
+            print("sending Username Exist")
             self.__socket.send(self.aes_cipher.encrypt("Username Exist") + config.CLIENT_DELIMITER)
 
     def change_email(self, new_email):
         """The function gets a request from the client to change his email. the server change the email if there
             the new email is valid."""
         if valid_email(new_email):
-            print "check: " + str(new_email.split("@")[1].split("."))
+            print("check: " + str(new_email.split("@")[1].split(".")))
             self.db.update_user(self.username, 'EMAIL', new_email)
             self.write_to_file("ChangeEmail" + "," + self.username + "," + new_email)
-            print "sending Email Changed"
+            print("sending Email Changed")
             self.__socket.send(self.aes_cipher.encrypt('Email Changed') + config.CLIENT_DELIMITER)
         else:
-            print "Sending Invalid Email"
+            print("Sending Invalid Email")
             self.__socket.send(self.aes_cipher.encrypt("Invalid Email") + config.CLIENT_DELIMITER)
 
     def change_password(self, old_password, new_password):
@@ -479,27 +480,27 @@ class ClientHandler(Thread):
         old_password = hashlib.sha224(old_password).hexdigest()
         if user[6] == old_password:
             self.db.update_user(self.username, 'PASSWORD', hashlib.sha224(new_password).hexdigest())
-            print "sending Password Changed"
+            print("sending Password Changed")
             self.__socket.send(self.aes_cipher.encrypt('Password Changed') + config.CLIENT_DELIMITER)
         else:
-            print "Sending Incorrect Password"
+            print("Sending Incorrect Password")
             self.__socket.send(self.aes_cipher.encrypt('Incorrect Password') + config.CLIENT_DELIMITER)
 
     def check_version(self, version, version_quality):
         """The functions gets a an android version, and checks if its old."""
         if version_quality < 5:
-            print "Sending You have an old version[" + version + "]. you must update for hotfixes"
+            print("Sending You have an old version[" + version + "]. you must update for hotfixes")
             self.write_to_file("Notification, - " + self.username + ": old version[" + version + "] - must update his"
                                                                                                  " version." + "\n")
-            print "Sending Notification," + "old version[" + version + "] - must update version."
+            print("Sending Notification," + "old version[" + version + "] - must update version.")
             self.__socket.send(self.aes_cipher.encrypt("Notification," + "old version[" + version +
                                                        "] - must update version.") + config.CLIENT_DELIMITER)
         elif 5 < version_quality < 8:
             self.write_to_file("Notification, - " + self.username +
                                ": old version[" + version + "] -  recommended to update his"
                                                             " version but still supported.\n")
-            print "Sending Notification,old version[" + version + "] - recommended to update" \
-                                                                  " version but still supported."
+            print("Sending Notification,old version[" + version + "] - recommended to update" \
+                                                                  " version but still supported.")
             self.__socket.send(self.aes_cipher.encrypt("Notification,old version[" + version +
                                                        "] - recommended to update version but still supported.") +
                                config.CLIENT_DELIMITER)
@@ -508,7 +509,7 @@ class ClientHandler(Thread):
         """The function deletes the user from the database and the UI."""
         self.db.delete_user(self.username)
         self.write_to_file("Delete" + "," + self.username)
-        print "Sending to " + self.username + ": Delete Complete"
+        print("Sending to " + self.username + ": Delete Complete")
         self.__socket.send(self.aes_cipher.encrypt("Delete Complete") + config.CLIENT_DELIMITER)
         self.db.close()
         self.__socket.close()
@@ -517,8 +518,7 @@ class ClientHandler(Thread):
         """The function logout from the current user account, and update it in the database and the UI."""
         self.db.update_user(self.username, "STATUS", "Offline")
         self.write_to_file("LogOut" + "," + self.username)
-        print "Sending to " + self.username + ": Logout Successfully"
+        print("Sending to " + self.username + ": Logout Successfully")
         self.__socket.send(self.aes_cipher.encrypt("Logout Successfully") + config.CLIENT_DELIMITER)
         self.db.close()
         self.__socket.close()
-		

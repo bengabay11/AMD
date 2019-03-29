@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from server import config
 from server.encryption.AESCipher import AESCipher
 from server.database import DataBase
-from server.send_email import Email
+from server.send_email import EmailSender
 
 FINISH = False
 FORGOT_PASSWORD = False
@@ -59,7 +59,7 @@ class ClientHandler(Thread):
         Thread.__init__(self)
         self.__socket = socket
         self.__address = address
-        self.email = Email(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
+        self.email = EmailSender(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
         self.db = None
         self.username = ''
         self.lock = Lock()
@@ -421,13 +421,14 @@ class ClientHandler(Thread):
         else:
             temporary_password = get_random_string(6)
             username = user[0]
-            email_to = user[5]
+            to = user[5]
             subject = "AMD - Forgot Password"
             body = "Hello " + username + "," + '\n\n' + "We received a request that you forgot your password. " \
                                                         "Login with your temporary password and set your own new " \
                                                         "password to be logged in." + '\n\n' + \
                    "your temporary password is: " + temporary_password
-            result = self.email.send_new_email(to=email_to, subject=subject, body=body)
+            msg = self.email.create_message(to, body, subject)
+            result = self.email.send_new_email(msg)
             if result == "Success":
                 print("Sending Email Sent")
                 self.__socket.send(self.aes_cipher.encrypt("Email Sent") + config.CLIENT_DELIMITER)

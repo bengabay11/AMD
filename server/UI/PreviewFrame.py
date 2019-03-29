@@ -1,16 +1,14 @@
 import wx
 from server import config
+from server.UI.utils import set_icon
 
 
 class PreviewFrame(wx.Frame):
-    """The main frame of the UI that has Menu Panel and Table Panel."""
 
     def __init__(self):
         wx.Frame.__init__(self, None, -1, "AMD Server", size=(500, 250))
 
         self.Center()
-
-        # set background to the MenuPanel
         self.SetBackgroundColour("LIGHT BLUE")
 
         self.title = wx.StaticText(self, label="AMD Server", pos=(40, 30))
@@ -27,7 +25,6 @@ class PreviewFrame(wx.Frame):
         set_icon(self)
 
     def on_listening(self, event):
-        """the function destroy the frame, and notify the main thread to start the server."""
         global START
         START = True
         self.Destroy()

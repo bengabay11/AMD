@@ -2,7 +2,7 @@ from threading import Thread
 import wx
 from server import config, client_handler
 from server.Server import Server
-from server.UI import MyFrame
+from server.UI.UI import MyFrame
 
 
 def start_server():

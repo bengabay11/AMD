@@ -3,7 +3,7 @@ import wx.grid
 import wx.lib.newevent
 from threading import Thread
 from server import config
-from server.database import DataBase
+from server.db.database import DataBase
 
 MALICIOUS_PROCESSES_DICT = {}
 ComputationDoneEvent, EVT_COMPUTATION_DONE = wx.lib.newevent.NewEvent()

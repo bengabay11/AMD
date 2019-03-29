@@ -8,8 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from server import config
 from server.encryption.AESCipher import AESCipher
-from server.database import DataBase
-from server.send_email import EmailSender
+from server.db.database import DataBase
+from server.EmailSender import EmailSender
 
 FINISH = False
 FORGOT_PASSWORD = False

@@ -7,7 +7,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from server import config
-from server.AMD_Encryption import AESCipher
+from server.encryption.AESCipher import AESCipher
 from server.database import DataBase
 from server.send_email import Email
 

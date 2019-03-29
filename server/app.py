@@ -15,12 +15,6 @@ def start_server():
 
 
 def main():
-    # preview_app = wx.App(False)
-    # preview_frame = PreviewFrame()
-    # preview_frame.Show()
-    # preview_app.MainLoop()
-
-    # if START:
     server_thread = Thread(target=start_server())
     server_thread.daemon = True
     server_thread.start()

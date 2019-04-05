@@ -1,6 +1,6 @@
 import os
 
-from src.server.ClientAction import ClientAction
+from src.server.network.ClientAction import ClientAction
 
 
 class ClientCameraOn(ClientAction):

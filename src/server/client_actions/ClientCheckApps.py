@@ -1,5 +1,5 @@
 from src.server import config
-from src.server.ClientAction import ClientAction
+from src.server.network.ClientAction import ClientAction
 from src.server.client_actions.utils import get_app_details
 
 

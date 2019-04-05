@@ -1,9 +1,9 @@
 from threading import Thread
 import wx
-from src.server import client_handler
+from src.server.network import client_handler
 from src.server import config
-from src.server.Server import Server
-from src.server.UiFileWriter import UiFileWriter
+from src.server.network.Server import Server
+from src.server.ui.UiFileWriter import UiFileWriter
 from src.server.client_actions.ClientCameraOn import ClientCameraOn
 from src.server.client_actions.ClientChangeEmail import ClientChangeEmail
 from src.server.client_actions.ClientChangePassword import ClientChangePassword

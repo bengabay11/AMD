@@ -2,7 +2,6 @@ from threading import Thread
 import wx
 from src.server import client_handler
 from src.server import config
-from src.server.EmailSender import EmailSender
 from src.server.Server import Server
 from src.server.UiFileWriter import UiFileWriter
 from src.server.client_actions.ClientCameraOn import ClientCameraOn

@@ -1,14 +1,10 @@
 import hashlib
 from src.server import config
+from src.server.ClientAction import ClientAction
 from src.server.client_actions.utils import valid_email
 
 
-class ClientSignUp:
-    def __init__(self, __db, aes_cipher, ui_file_writer):
-        self.__db = __db
-        self.__aes_cipher = aes_cipher
-        self.__ui_file_writer = ui_file_writer
-
+class ClientSignUp(ClientAction):
     def act(self, data, send):
         list_data = data.split(config.CLIENT_DELIMITER)
         username, password, email = list_data[1], list_data[2], list_data[3]

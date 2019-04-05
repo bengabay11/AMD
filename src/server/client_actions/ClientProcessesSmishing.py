@@ -1,11 +1,6 @@
+from src.server.ClientAction import ClientAction
 
 
-class ClientCheckProcesses:
-    def __init__(self, db):
-        self.__db = db
-
-    def act(self, client_data):
+class ClientCheckProcesses(ClientAction):
+    def act(self, data, send):
         pass
-
-
-

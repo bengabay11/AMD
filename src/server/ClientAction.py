@@ -2,8 +2,8 @@ import abc
 
 
 class ClientAction(abc.ABC):
-    def __init__(self, __db, aes_cipher, ui_file_writer):
-        self.__db = __db
+    def __init__(self, db, aes_cipher, ui_file_writer):
+        self.__db = db
         self.__aes_cipher = aes_cipher
         self.__ui_file_writer = ui_file_writer
 

@@ -1,11 +1,10 @@
+from src.server.ClientAction import ClientAction
 
 
-class ClientUnknownSources:
-    def __init__(self, db):
-        self.__db = db
-
-    def act(self, client_data):
-        pass
-
-
-
+class ClientUnknownSources(ClientAction):
+    def act(self, data, send):
+        if data == "Allowed":
+            self.__ui_file_writer.write("Notification" + ",- " + self.username + ": Unknown Sources permission is "
+                                                                                 "allowed" + ".\n")
+            self.__ui_file_writer.write("UnknownSources," + self.username + "," + data)
+            self.__db.update_user(self.username, "Unknown_Sources", data)

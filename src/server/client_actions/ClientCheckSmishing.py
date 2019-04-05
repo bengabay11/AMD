@@ -1,11 +1,14 @@
+from src.server.ClientAction import ClientAction
 
 
-class ClientCheckSmishing:
-    def __init__(self, db):
-        self.__db = db
+class ClientCheckSmishing(ClientAction):
+    def act(self, data, send):
+        list_inbox = []
+        list_sms = data.split("&*(")
+        for i in range(len(list_sms)):
+            sms_info = list_sms[i]
+            address = sms_info.split("#^%")[0]
+            body = sms_info.split("&*(")[1]
+            list_inbox.append((address, body))
 
-    def act(self, client_data):
-        pass
-
-
-
+        print(list_inbox)

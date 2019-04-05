@@ -2,7 +2,9 @@ from threading import Thread
 import wx
 from src.server import client_handler
 from src.server import config
+from src.server.EmailSender import EmailSender
 from src.server.Server import Server
+from src.server.UiFileWriter import UiFileWriter
 from src.server.client_actions.ClientCameraOn import ClientCameraOn
 from src.server.client_actions.ClientChangeEmail import ClientChangeEmail
 from src.server.client_actions.ClientChangePassword import ClientChangePassword
@@ -17,13 +19,18 @@ from src.server.client_actions.ClientLogin import ClientLogin
 from src.server.client_actions.ClientProcessesSmishing import ClientCheckProcesses
 from src.server.client_actions.ClientSignUp import ClientSignUp
 from src.server.client_actions.ClientUnknownSources import ClientUnknownSources
+from src.server.client_actions.utils import get_random_string
 from src.server.db.database import DataBase
 from src.server.ui.MainFrame import MainFrame
 
 
 def start_server():
     db = DataBase()
-    client_actions = {"Login": ClientLogin(db), "SignUp": ClientSignUp(db), "ForgotPassword": ClientForgotPassword(db),
+    ui_file_writer = UiFileWriter()
+    email = EmailSender(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
+    aes_key = get_random_string(10)
+    client_actions = {"Login": ClientLogin(db, aes_key, ui_file_writer), "SignUp": ClientSignUp(db),
+                      "ForgotPassword": ClientForgotPassword(db),
                       "ChangeTemporaryPassword": ClientChangeTemporaryPassword(db),
                       "CheckVersion": ClientCheckVersion(db), "CheckApps": ClientCheckApps(db),
                       "CheckProcesses": ClientCheckProcesses(db), "CheckSmishing": ClientCheckSmishing(db),
@@ -35,7 +42,7 @@ def start_server():
     server_socket.start(config.SERVER_IP, config.SERVER_PORT, config.NUM_CLIENTS)
     while True:
         (client_socket, client_address) = server_socket.accept()
-        clh = client_handler.ClientHandler(client_socket, client_actions)
+        clh = client_handler.ClientHandler(client_socket, client_actions, aes_key)
         clh.start()
 
 

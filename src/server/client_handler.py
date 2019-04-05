@@ -1,35 +1,24 @@
 import codecs
-import random
-from string import digits, ascii_lowercase
-from threading import Thread, Lock
+from threading import Thread
 import hashlib
 import time
-import requests
-from bs4 import BeautifulSoup
 from src.server import config
 from src.server.client_actions.utils import get_random_string
 from src.server.db.database import DataBase
 from src.server.encryptions.AESCipher import AESCipher
-from src.server.EmailSender import EmailSender
+
 
 FINISH = False
 FORGOT_PASSWORD = False
 
 
 class ClientHandler(Thread):
-    def __init__(self, socket, client_actions):
+    def __init__(self, socket, client_actions, aes_key):
         Thread.__init__(self)
         self.__socket = socket
         self.__client_actions = client_actions
-        self.email = EmailSender(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
-        self.username = ''
-        self.lock = Lock()
-        self.aes_key = get_random_string(10)
+        self.aes_key = aes_key
         self.aes_cipher = None
-        self.check_apps_data = ""
-        self.list_applications = []
-        self.check_smishing_data = ""
-        self.check_processes_data = ""
 
     def run(self):
         """The function is ran when starting the thread."""
@@ -43,7 +32,10 @@ class ClientHandler(Thread):
             encrypted_data = self.__socket.recv(config.DATA_LENGTH)
             plain_data = self.aes_cipher.decrypt(encrypted_data)
             client_data = ""  # deserialize to client data object
-            self.__client_actions[client_data.type].act(client_data.data)
+            self.__client_actions[client_data.type].act(client_data.data, self.__socket.send)
+
+    def close(self):
+        pass
 
 
             # data_from_client = part_of_data + data_from_client

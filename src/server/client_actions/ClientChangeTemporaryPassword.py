@@ -1,11 +1,8 @@
 
 
-class ClientLogin:
+class ClientChangeTemporaryPassword:
     def __init__(self, db):
-        self.__db = db
+        pass
 
     def act(self, client_data):
         pass
-
-
-

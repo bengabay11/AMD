@@ -7,6 +7,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from src.server import config
+from src.server.client_actions.utils import get_random_string
 from src.server.db.database import DataBase
 from src.server.encryptions.AESCipher import AESCipher
 from src.server.EmailSender import EmailSender
@@ -15,50 +16,12 @@ FINISH = False
 FORGOT_PASSWORD = False
 
 
-def valid_email(email):
-    """The function checks if the email is legal."""
-    if len(email.split("@")) == 2:
-        if email.split("@")[0] != "" and email.split("@")[1] != "" and "." in email.split("@")[1]:
-            if len(email.split("@")[1].split(".")) == 2 and email.split("@")[1].split(".")[1] != "":
-                print(email.split("@")[1].split("."))
-                return True
-    return False
-
-
-def get_random_string(length):
-    """The function gets number of letters and return random string include numbers and chars"""
-    return ''.join(random.choice(ascii_lowercase + digits) for _ in range(length))
-
-
-def get_app_details(app_url):
-    """The function gets app url and return his details from play store."""
-    try:
-        app_page = requests.get(app_url)
-        # Provide the app page content to BeautifulSoup parser
-        soup = BeautifulSoup(app_page.content, 'html.parser')
-        # Get value from meta tag rating
-        ratings_value = soup.find("meta", {"itemprop": "ratingValue"})['content']
-        ratings_count = soup.find("meta", {"itemprop": "ratingCount"})['content']
-        # Get value by attribute
-        num_downloads = soup.find("div", {"itemprop": "numDownloads"}).text
-        num_downloads_abs = num_downloads.split("-")[1]
-        app_details = {'rating': float(ratings_value), 'rated_by': int(ratings_count),
-                       'downloads': int(num_downloads_abs.replace(" ", "").replace(",", "")),
-                       'downloads_range': num_downloads}
-        return app_details
-    except AttributeError:
-        return None
-    except TypeError:
-        return None
-
-
 class ClientHandler(Thread):
-    def __init__(self, socket, db, client_actions):
+    def __init__(self, socket, client_actions):
         Thread.__init__(self)
         self.__socket = socket
         self.__client_actions = client_actions
         self.email = EmailSender(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
-        self.db = db
         self.username = ''
         self.lock = Lock()
         self.aes_key = get_random_string(10)
@@ -74,116 +37,120 @@ class ClientHandler(Thread):
         self.aes_cipher = AESCipher(self.aes_key)
         self.__socket.send("AESKey," + self.aes_key)
 
-        part_of_data = ""
         global FINISH
         FINISH = False
         while FINISH is False:
-            data_from_client = self.__socket.recv(config.DATA_LENGTH)
-            data_from_client = part_of_data + data_from_client
-            part_of_data = ""
-            messages = data_from_client.split(config.SERVER_DELIMITER)
-            if messages[len(messages) - 1] != "":
-                part_of_data = messages[len(messages) - 1]
-                messages = messages[:len(messages) - 1]
-            for message in messages:
-                if message != "":
-                    message = self.aes_cipher.decrypt(message)
-                    print("\nRequest: " + message)
-                    # analyze the request that the client sent
-                    list_data = message.split(',')
-                    request = list_data[0]
+            encrypted_data = self.__socket.recv(config.DATA_LENGTH)
+            plain_data = self.aes_cipher.decrypt(encrypted_data)
+            client_data = ""  # deserialize to client data object
+            self.__client_actions[client_data.type].act(client_data.data)
 
-                    if request == 'Login':
-                        check_username, check_password = list_data[1], list_data[2]
-                        self.login(check_username, check_password)
 
-                    elif request == 'SignUp':
-                        username, password, email = list_data[1], list_data[2], list_data[3]
-                        self.sign_up(username, password, email)
+            # data_from_client = part_of_data + data_from_client
+            # part_of_data = ""
+            # messages = data_from_client.split(config.SERVER_DELIMITER)
+            # if messages[len(messages) - 1] != "":
+            #     part_of_data = messages[len(messages) - 1]
+            #     messages = messages[:len(messages) - 1]
+            # for message in messages:
+            #     if message != "":
+            #         message = self.aes_cipher.decrypt(message)
+            #         print("\nRequest: " + message)
+            #         # analyze the request that the client sent
+            #         list_data = message.split(',')
+            #         request = list_data[0]
+            #
+            #         if request == 'Login':
+            #             check_username, check_password = list_data[1], list_data[2]
+            #             self.login(check_username, check_password)
+            #
+            #         elif request == 'SignUp':
+            #             username, password, email = list_data[1], list_data[2], list_data[3]
+            #             self.sign_up(username, password, email)
+            #
+            #         elif request == 'ForgotPassword':
+            #             username_or_email = list_data[1]
+            #             self.forgot_password(username_or_email)
+            #
+            #         elif request == "ChangeTemporaryPassword":
+            #             new_password = list_data[1]
+            #             self.change_temporary_password(new_password)
+            #
+            #         elif request == 'CheckVersion':
+            #             version = list_data[1]
+            #             version_quality = int(version.split('.')[0])
+            #             check_version_thread = Thread(target=self.check_version, args=(version, version_quality))
+            #             check_version_thread.start()
+            #
+            #         elif request == "CheckAppsData":
+            #             print("Sending CheckApps part accepted")
+            #             self.__socket.send(self.aes_cipher.encrypt("CheckApps part accepted") +
+            #                                config.CLIENT_DELIMITER)
+            #             self.check_apps_data += list_data[1]
+            #
+            #         elif request == 'CheckApps':
+            #             print("CheckApps Length: " + str(len(self.check_apps_data)))
+            #             self.handle_check_apps_data()
+            #             check_apps_thread = Thread(target=self.check_apps)
+            #             check_apps_thread.start()
+            #             apps_review_thread = Thread(target=self.check_apps_review)
+            #             apps_review_thread.daemon = True
+            #             apps_review_thread.start()
+            #
+            #         elif request == "CheckSmishingData":
+            #             self.check_smishing_data += list_data[1]
+            #
+            #         elif request == "CheckSmishing":
+            #             check_smishing_data = self.check_smishing_data
+            #             self.check_smishing_data = ""
+            #             check_smishing_thread = Thread(target=self.check_smishing, args=(check_smishing_data,))
+            #             check_smishing_thread.start()
+            #
+            #         elif request == "CheckProcessesData":
+            #             self.__socket.send(self.aes_cipher.encrypt("CheckProcesses part accepted") +
+            #                                config.CLIENT_DELIMITER)
+            #             self.check_processes_data += list_data[1]
+            #
+            #         elif request == "CheckProcesses":
+            #             print("CheckProcesses Length: " + str(len(self.check_processes_data)))
+            #             output = self.check_processes_data
+            #             self.check_processes_data = ""
+            #             check_processes_thread = Thread(target=self.check_processes, args=(output,))
+            #             check_processes_thread.start()
+            #
+            #         elif request == "CameraOn":
+            #             current_time = list_data[1]
+            #             self.camera_on(current_time)
+            #
+            #         elif request == "UnknownSources":
+            #             allowed = list_data[1]
+            #             if allowed == "Allowed":
+            #                 self.write_to_file("Notification" + ",- " + self.username +
+            #                                    ": Unknown Sources permission is allowed" + ".\n")
+            #             self.write_to_file("UnknownSources," + self.username + "," + allowed)
+            #             self.db.update_user(self.username, "Unknown_Sources", allowed)
+            #
+            #         elif request == 'ChangeUsername':
+            #             new_username = list_data[1]
+            #             self.change_username(new_username)
+            #
+            #         elif request == 'ChangePassword':
+            #             old_password, new_password = list_data[1], list_data[2]
+            #             self.change_password(old_password, new_password)
+            #
+            #         elif request == 'ChangeEmail':
+            #             new_email = list_data[1]
+            #             self.change_email(new_email)
+            #
+            #         elif request == 'DeleteUser':
+            #             self.delete_user()
+            #             FINISH = True
+            #             break
 
-                    elif request == 'ForgotPassword':
-                        username_or_email = list_data[1]
-                        self.forgot_password(username_or_email)
-
-                    elif request == "ChangeTemporaryPassword":
-                        new_password = list_data[1]
-                        self.change_temporary_password(new_password)
-
-                    elif request == 'CheckVersion':
-                        version = list_data[1]
-                        version_quality = int(version.split('.')[0])
-                        check_version_thread = Thread(target=self.check_version, args=(version, version_quality))
-                        check_version_thread.start()
-
-                    elif request == "CheckAppsData":
-                        print("Sending CheckApps part accepted")
-                        self.__socket.send(self.aes_cipher.encrypt("CheckApps part accepted") +
-                                           config.CLIENT_DELIMITER)
-                        self.check_apps_data += list_data[1]
-
-                    elif request == 'CheckApps':
-                        print("CheckApps Length: " + str(len(self.check_apps_data)))
-                        self.handle_check_apps_data()
-                        check_apps_thread = Thread(target=self.check_apps)
-                        check_apps_thread.start()
-                        apps_review_thread = Thread(target=self.check_apps_review)
-                        apps_review_thread.daemon = True
-                        apps_review_thread.start()
-
-                    elif request == "CheckSmishingData":
-                        self.check_smishing_data += list_data[1]
-
-                    elif request == "CheckSmishing":
-                        check_smishing_data = self.check_smishing_data
-                        self.check_smishing_data = ""
-                        check_smishing_thread = Thread(target=self.check_smishing, args=(check_smishing_data,))
-                        check_smishing_thread.start()
-
-                    elif request == "CheckProcessesData":
-                        self.__socket.send(self.aes_cipher.encrypt("CheckProcesses part accepted") +
-                                           config.CLIENT_DELIMITER)
-                        self.check_processes_data += list_data[1]
-
-                    elif request == "CheckProcesses":
-                        print("CheckProcesses Length: " + str(len(self.check_processes_data)))
-                        output = self.check_processes_data
-                        self.check_processes_data = ""
-                        check_processes_thread = Thread(target=self.check_processes, args=(output,))
-                        check_processes_thread.start()
-
-                    elif request == "CameraOn":
-                        current_time = list_data[1]
-                        self.camera_on(current_time)
-
-                    elif request == "UnknownSources":
-                        allowed = list_data[1]
-                        if allowed == "Allowed":
-                            self.write_to_file("Notification" + ",- " + self.username +
-                                               ": Unknown Sources permission is allowed" + ".\n")
-                        self.write_to_file("UnknownSources," + self.username + "," + allowed)
-                        self.db.update_user(self.username, "Unknown_Sources", allowed)
-
-                    elif request == 'ChangeUsername':
-                        new_username = list_data[1]
-                        self.change_username(new_username)
-
-                    elif request == 'ChangePassword':
-                        old_password, new_password = list_data[1], list_data[2]
-                        self.change_password(old_password, new_password)
-
-                    elif request == 'ChangeEmail':
-                        new_email = list_data[1]
-                        self.change_email(new_email)
-
-                    elif request == 'DeleteUser':
-                        self.delete_user()
-                        FINISH = True
-                        break
-
-                    elif request == 'LogOut' or data_from_client == '':
-                        self.logout()
-                        FINISH = True
-                        break
+            # elif request == 'LogOut' or data_from_client == '':
+            #     self.logout()
+            #     FINISH = True
+            #     break
 
     def write_to_file(self, data):
         """The function gets data and writes it to file. the ui read the data from this file and present it."""
@@ -386,7 +353,8 @@ class ClientHandler(Thread):
 
             if suspicious_process:
                 suspicious_processes_data += (process_name + chr(20) + process_user + chr(20) + process_info["PID"] +
-                                                 chr(20) + process_info["PPID"] + chr(20) + process_info["WCHAN"] + chr(25))
+                                              chr(20) + process_info["PPID"] + chr(20) + process_info["WCHAN"] + chr(
+                            25))
                 suspicious_process = False
                 db2 = DataBase()
                 user = db2.get_user(self.username)

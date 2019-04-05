@@ -53,10 +53,7 @@ def get_app_details(app_url):
 
 
 class ClientHandler(Thread):
-    """Thread that runs by 'server' class. this thread incarge of all the cominication with the current client and
-     the server."""
-    def \
-            __init__(self, socket, db, client_actions):
+    def __init__(self, socket, db, client_actions):
         Thread.__init__(self)
         self.__socket = socket
         self.__client_actions = client_actions
@@ -77,8 +74,6 @@ class ClientHandler(Thread):
         self.aes_cipher = AESCipher(self.aes_key)
         self.__socket.send("AESKey," + self.aes_key)
 
-        # Connect to the db
-        self.db = DataBase()
         part_of_data = ""
         global FINISH
         FINISH = False

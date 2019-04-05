@@ -1,7 +1,5 @@
-import codecs
 from threading import Thread
 import hashlib
-import time
 from src.server import config
 from src.server.client_actions.utils import get_random_string
 from src.server.db.database import DataBase
@@ -37,34 +35,11 @@ class ClientHandler(Thread):
     def close(self):
         pass
 
-
-            # data_from_client = part_of_data + data_from_client
-            # part_of_data = ""
-            # messages = data_from_client.split(config.SERVER_DELIMITER)
-            # if messages[len(messages) - 1] != "":
-            #     part_of_data = messages[len(messages) - 1]
-            #     messages = messages[:len(messages) - 1]
-            # for message in messages:
-            #     if message != "":
-            #         message = self.aes_cipher.decrypt(message)
-            #         print("\nRequest: " + message)
-            #         # analyze the request that the client sent
-            #         list_data = message.split(',')
-            #         request = list_data[0]
-            #
-            #         if request == 'Login':
-            #             check_username, check_password = list_data[1], list_data[2]
-            #             self.login(check_username, check_password)
-            #
-            #         elif request == 'SignUp':
-            #             username, password, email = list_data[1], list_data[2], list_data[3]
-            #             self.sign_up(username, password, email)
-            #
             #         elif request == 'ForgotPassword':
             #             username_or_email = list_data[1]
             #             self.forgot_password(username_or_email)
             #
-            #         elif request == "ChangeTemporaryPassword":
+            #         elif request == "ChangeTemporaryPassword":x
             #             new_password = list_data[1]
             #             self.change_temporary_password(new_password)
             #
@@ -73,21 +48,6 @@ class ClientHandler(Thread):
             #             version_quality = int(version.split('.')[0])
             #             check_version_thread = Thread(target=self.check_version, args=(version, version_quality))
             #             check_version_thread.start()
-            #
-            #         elif request == "CheckAppsData":
-            #             print("Sending CheckApps part accepted")
-            #             self.__socket.send(self.aes_cipher.encrypt("CheckApps part accepted") +
-            #                                config.CLIENT_DELIMITER)
-            #             self.check_apps_data += list_data[1]
-            #
-            #         elif request == 'CheckApps':
-            #             print("CheckApps Length: " + str(len(self.check_apps_data)))
-            #             self.handle_check_apps_data()
-            #             check_apps_thread = Thread(target=self.check_apps)
-            #             check_apps_thread.start()
-            #             apps_review_thread = Thread(target=self.check_apps_review)
-            #             apps_review_thread.daemon = True
-            #             apps_review_thread.start()
             #
             #         elif request == "CheckSmishingData":
             #             self.check_smishing_data += list_data[1]
@@ -144,73 +104,6 @@ class ClientHandler(Thread):
             #     FINISH = True
             #     break
 
-    def write_to_file(self, data):
-        """The function gets data and writes it to file. the ui read the data from this file and present it."""
-        self.lock.acquire()
-        file_object = codecs.open(config.UI_DATA_FILENAME, "a", encoding="utf-8")
-        file_object.write(data + config.FILE_DELIMITER)
-        file_object.close()
-        self.lock.release()
-
-    def login(self, check_username, check_password):
-        """The function checks if the login request is valid Through the Database, and send a message to the client
-         that says if he was able to connect or not."""
-        user = self.db.get_user(check_username)
-        if user is None:
-            print("Sending Incorrect Username")
-            self.__socket.send(self.aes_cipher.encrypt("Incorrect Username") + config.CLIENT_DELIMITER)
-        else:
-            username, password, forgot_password = user[0], user[6], user[7]
-            self.username = username
-            check_password = hashlib.sha224(check_password).hexdigest()
-            if username == check_username and password == check_password:
-                self.db.update_user(username, "STATUS", "Online")
-                self.write_to_file("Login" + "," + username)
-                if forgot_password == 0:
-                    print("Sending to " + self.username + ": Login Complete")
-                    self.__socket.send(self.aes_cipher.encrypt("Login Complete") + config.CLIENT_DELIMITER)
-                elif forgot_password == 1:
-                    print("Sending to " + self.username + ": Login Complete, need to change password")
-                    self.__socket.send(self.aes_cipher.encrypt("Login Complete, need to change password") +
-                                       config.CLIENT_DELIMITER)
-            else:
-                print("sending: Incorrect Password")
-                self.__socket.send(self.aes_cipher.encrypt("Incorrect Password") + config.CLIENT_DELIMITER)
-
-    def sign_up(self, username, password, email):
-        """The function gets a sign up request from the client and checks if there is already username with this
-         details, and send a message to the client that says if account created or not."""
-        if valid_email(email):
-            new_user = self.db.get_user(username)
-            if new_user is None:
-                self.username = username
-                password = hashlib.sha224(password).hexdigest()
-                self.db.add_user([username, "Online", 0, 0, 0, email, password, False, 0])
-                print("sending Username Accepted")
-                self.__socket.send(self.aes_cipher.encrypt("Username Accepted") + config.CLIENT_DELIMITER)
-                self.write_to_file("SignUp" + "," + username + "," + email)
-            else:
-                print("sending Username Exist")
-                self.__socket.send(self.aes_cipher.encrypt("Username Exist") + config.CLIENT_DELIMITER)
-        else:
-            print("Sending Invalid Email")
-            self.__socket.send(self.aes_cipher.encrypt("Invalid Email") + config.CLIENT_DELIMITER)
-
-    def handle_check_apps_data(self):
-        """ The function create from the full data of CheckApps list of applications."""
-        print("Sending Loading Complete")
-        self.__socket.send(self.aes_cipher.encrypt("Loading Complete") + config.CLIENT_DELIMITER)
-        time.sleep(1)
-        check_apps_data = self.check_apps_data
-        self.check_apps_data = ""
-        list_apps = check_apps_data.split("&")
-        for i in range(len(list_apps)):
-            app_info = list_apps[i]
-            app_name = app_info.split(":")[0]
-            app_package = app_info.split(":")[1]
-            app_installer = app_info.split(":")[2]
-            list_permissions = app_info.split(":")[3].split("/")
-            self.list_applications.append((app_name, app_package, app_installer, list_permissions))
 
     def check_apps_review(self):
         """The function check the review of the apps on play store."""

@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from email.errors import MessageError
 import os
 
+from src.server import config
 
 SMTP_SERVER_HOST = 'smtp.gmail.com'
 SMTP_SERVER_PORT = 587
@@ -36,7 +37,7 @@ class EmailSender:
     @staticmethod
     def attach_file(msg, file_path):
         if os.path.exists(file_path):
-            attachment_file = open(file_path, "rb")
+            attachment_file = open(file_path, config.FILE_READ_MODE)
             image_data = attachment_file.read()
             msg.add_attachment(image_data, maintype='image', subtype=imghdr.what(None, image_data))
 

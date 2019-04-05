@@ -3,6 +3,10 @@ SERVER_PORT = 6000
 NUM_CLIENTS = 100
 DATA_LENGTH = 1024
 
+FILE_READ_MODE = "r"
+FILE_APPEND_MODE = "a"
+FILE_ENCODING = "utf-8"
+
 ICON_PIC_NAME = "images\\amd_icon.jpg"
 WX_VERSION = "3.0"
 UI_DATA_FILENAME = "ui-data.txt"

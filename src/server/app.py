@@ -3,15 +3,17 @@ import wx
 from src.server import client_handler
 from src.server import config
 from src.server.Server import Server
+from src.server.db.database import DataBase
 from src.server.ui.MainFrame import MainFrame
 
 
 def start_server():
+    db = DataBase()
     server_socket = Server()
     server_socket.start(config.SERVER_IP, config.SERVER_PORT, config.NUM_CLIENTS)
     while True:
         (client_socket, client_address) = server_socket.accept()
-        clh = client_handler.ClientHandler(client_socket, client_address)
+        clh = client_handler.ClientHandler(client_socket, db)
         clh.start()
 
 

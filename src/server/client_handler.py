@@ -55,18 +55,17 @@ def get_app_details(app_url):
 class ClientHandler(Thread):
     """Thread that runs by 'server' class. this thread incarge of all the cominication with the current client and
      the server."""
-    def __init__(self, socket, address):
+    def \
+            __init__(self, socket, db, client_actions):
         Thread.__init__(self)
         self.__socket = socket
-        self.__address = address
+        self.__client_actions = client_actions
         self.email = EmailSender(config.EMAIL_USERNAME, config.EMAIL_PASSWORD)
-        self.db = None
+        self.db = db
         self.username = ''
         self.lock = Lock()
         self.aes_key = get_random_string(10)
         self.aes_cipher = None
-        print("[%s] New client accepted: %s" % (self.name, self.__address))
-
         self.check_apps_data = ""
         self.list_applications = []
         self.check_smishing_data = ""

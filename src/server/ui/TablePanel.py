@@ -3,7 +3,7 @@ import wx
 import wx.grid
 import wx.lib.newevent
 from src.server import config
-from src.server.UI.utils import show_user_info
+from src.server.ui.utils import show_user_info
 from src.server.db.database import DataBase
 
 ComputationDoneEvent, EVT_COMPUTATION_DONE = wx.lib.newevent.NewEvent()
@@ -51,8 +51,8 @@ class TablePanel(wx.Panel):
         self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.on_selected_cell)
 
     def get_data(self):
-        """The function runs as a thread, and read in while loop from txt file, to get data changes in the UI.
-         every time the function gets new data she inform the UI main thread by PostEvent."""
+        """The function runs as a thread, and read in while loop from txt file, to get data changes in the ui.
+         every time the function gets new data she inform the ui main thread by PostEvent."""
         global NOTIFICATION, CONTINUE
         file_name = config.UI_DATA_FILENAME
         f = open(file_name, "wb")
@@ -82,7 +82,7 @@ class TablePanel(wx.Panel):
                         position += len(list_notifications[position:]) - 1
 
     def update_table(self, event):
-        """The function analyzes the command to the UI, and calls a function accordingly."""
+        """The function analyzes the command to the ui, and calls a function accordingly."""
         global CONTINUE, NOTIFICATION, MALICIOUS_PROCESSES_DICT
         list_command = NOTIFICATION.split(",")
         request = list_command[0]
@@ -220,7 +220,7 @@ class TablePanel(wx.Panel):
             show_user_info_thread.start()
 
     def increase_cell(self, username, column):
-        """The function increase in the UI the count in the relevant cell."""
+        """The function increase in the ui the count in the relevant cell."""
         for row in range(100):
             check_username = self.grid.GetCellValue(row, 0)
             if check_username == username:

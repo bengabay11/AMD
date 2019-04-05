@@ -1,8 +1,8 @@
 import wx
 from src.server import config
-from src.server.UI.MenuPanel import MenuPanel
-from src.server.UI.TablePanel import TablePanel
-from src.server.UI.utils import set_icon, show_user_info
+from src.server.ui.MenuPanel import MenuPanel
+from src.server.ui.TablePanel import TablePanel
+from src.server.ui.utils import set_icon, show_user_info
 
 
 class MainFrame(wx.Frame):

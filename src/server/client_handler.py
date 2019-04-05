@@ -192,7 +192,7 @@ class ClientHandler(Thread):
                         break
 
     def write_to_file(self, data):
-        """The function gets data and writes it to file. the UI read the data from this file and present it."""
+        """The function gets data and writes it to file. the ui read the data from this file and present it."""
         self.lock.acquire()
         file_object = codecs.open(config.UI_DATA_FILENAME, "a", encoding="utf-8")
         file_object.write(data + config.FILE_DELIMITER)
@@ -506,7 +506,7 @@ class ClientHandler(Thread):
                                config.CLIENT_DELIMITER)
 
     def delete_user(self):
-        """The function deletes the user from the database and the UI."""
+        """The function deletes the user from the database and the ui."""
         self.db.delete_user(self.username)
         self.write_to_file("Delete" + "," + self.username)
         print("Sending to " + self.username + ": Delete Complete")
@@ -515,7 +515,7 @@ class ClientHandler(Thread):
         self.__socket.close()
 
     def logout(self):
-        """The function logout from the current user account, and update it in the database and the UI."""
+        """The function logout from the current user account, and update it in the database and the ui."""
         self.db.update_user(self.username, "STATUS", "Offline")
         self.write_to_file("LogOut" + "," + self.username)
         print("Sending to " + self.username + ": Logout Successfully")

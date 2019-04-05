@@ -1,4 +1,4 @@
-# from src.server.UI.utils import set_icon
+# from src.server.ui.utils import set_icon
 import wx
 import wx.grid
 

@@ -1,6 +1,6 @@
 import wx
 from src.server import config
-from src.server.UI.UserInfoFrame import UserInfoFrame
+from src.server.ui.UserInfoFrame import UserInfoFrame
 
 
 def set_icon(frame):

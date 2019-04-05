@@ -3,7 +3,7 @@ import wx
 from src.server import client_handler
 from src.server import config
 from src.server.Server import Server
-from src.server.UI.MainFrame import MainFrame
+from src.server.ui.MainFrame import MainFrame
 
 
 def start_server():
